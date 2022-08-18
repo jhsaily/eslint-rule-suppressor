@@ -8,13 +8,13 @@
   },
   "scripts": {
     "build-and-run": "npm run build && npm run deploy && npm run invoke",
-    "build": "npm run compile && npm run test",
+    "build": "npm run lint && npm run compile && npm run test",
     "compile": "npm run clean && tsc --project tsconfig.app.json",
     "clean": "rimraf ./dist",
     "test": "jest --passWithNoTests",
-    "lint": "eslint . --ext .ts",
+    "lint": "eslint ./src --ext .ts",
     "deploy": "npm uninstall -g && npm install -g",
-    "invoke": "eslint-rule-suppressor --src ./test-files"
+    "invoke": "eslint-rule-suppressor"
   },
   "author": "",
   "license": "MIT",

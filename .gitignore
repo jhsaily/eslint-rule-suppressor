@@ -1,5 +1,7 @@
-# Webstorm specific stuff
+# Platform specific stuff
 .idea
+.DS_Store
+**/.DS_Store
 
 # Dependency directory
 node_modules
