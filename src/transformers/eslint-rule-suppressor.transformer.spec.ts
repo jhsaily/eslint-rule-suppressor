@@ -70,7 +70,7 @@ describe('eslint-rule-suppressor.transformer', () => {
         const expectedResult = await readFileAsync(expectedPath);
         const result = await runTransformerAsync(testFilePath);
 
-        expect(result).toEqual(expectedResult);
+        expect(result.split(/\r?\n/)).toEqual(expectedResult.split(/\r?\n/));
     })
 
     it('should transform a file with multiple errors on a single line', async () => {
@@ -80,6 +80,6 @@ describe('eslint-rule-suppressor.transformer', () => {
         const expectedResult = await readFileAsync(expectedPath);
         const result = await runTransformerAsync(testFilePath);
 
-        expect(result).toEqual(expectedResult);
+        expect(result.split(/\r?\n/)).toEqual(expectedResult.split(/\r?\n/));
     })
 })
