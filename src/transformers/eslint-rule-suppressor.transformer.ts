@@ -51,7 +51,7 @@ export default async function eslintRuleSuppressor(file: FileInfo, api: API, opt
     }
 }
 
-function addDisableComment(filePath: string, api: API, commentText: string, targetLine: number, ruleId: string, path:  ASTPath<any>) {
+function addDisableComment(filePath: string, api: API, commentText: string, targetLine: number, ruleId: string, path: ASTPath<any>) {
 
     let targetPath = path;
     while (
@@ -245,7 +245,7 @@ function addDisableComment(filePath: string, api: API, commentText: string, targ
     createNormalComment(api, ruleId, commentText, targetPath.value);
 }
 
-function createNormalComment(api, ruleId, commentText, targetNode) {
+function createNormalComment(api: API, ruleId: string, commentText: string, targetNode) {
 
     if (tryRewriteEslintDisable(targetNode.leadingComments, ruleId)) {
         return;
@@ -328,7 +328,7 @@ function tryRewriteEslintDisable(comments, ruleId) {
 // Using the builder methods to generate a jsx comment expression
 // results in newlines in weird places. Parsing the exact strings that
 // we want, however, produces the desired output.
-function createJsxComment(api, text) {
+function createJsxComment(api: API, text: string) {
     // The <element> around the curly braces causes this to be parsed as a JSXExpressionContainer
     // instead of as a BlockExpression.
     const expressionContainer = api.j(`<element>{/* a comment */}</element>`).paths()[0].value.program
@@ -343,7 +343,7 @@ function createJsxComment(api, text) {
 // in comments without preceding newlines. However, parsing a small
 // module containing a trailing comment with a preceding newline will
 // generate a node with the necessary properties.
-function createTrailingComment(api, text) {
+function createTrailingComment(api: API, text: string) {
     const comment = api
         .j(
             `statement();

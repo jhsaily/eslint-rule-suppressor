@@ -82,4 +82,14 @@ describe('eslint-rule-suppressor.transformer', () => {
 
         expect(result.split(/\r?\n/)).toEqual(expectedResult.split(/\r?\n/));
     })
+
+    it('should transform a file with errors on lines with decorators applied', async () => {
+        const testFileName = 'class-with-decorators'
+        const testFilePath = getActualPath(testFileName, false);
+        const expectedPath = getExpectedPath(testFileName, false);
+        const expectedResult = await readFileAsync(expectedPath);
+        const result = await runTransformerAsync(testFilePath);
+
+        expect(result.split(/\r?\n/)).toEqual(expectedResult.split(/\r?\n/));
+    })
 })
