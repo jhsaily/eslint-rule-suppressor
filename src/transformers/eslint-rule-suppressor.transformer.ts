@@ -3,6 +3,9 @@ import { FileInfo, API, Options } from 'jscodeshift';
 import { EOL } from 'node:os';
 
 const COMMENT_TEXT = 'TODO: Fix this the next time this file needs to be modified.';
+const COMMENT_TEXT_REGEXP = /^.*TODO: Fix this the next time this file needs to be modified.*/;
+const ESLINT_DISABLE_TEXT = 'eslint-disable-next-line';
+const ESLINT_DISABLE_REGEXP = /^.*eslint-disable-next-line(\s|$)(.*)/;
 
 export default async function eslintRuleSuppressor(file: FileInfo, api: API, options: Options) {
     const eslint = importESLint();
@@ -21,24 +24,57 @@ export default async function eslintRuleSuppressor(file: FileInfo, api: API, opt
             return;
         }
 
-        // const codeShiftResult = api.j(file.source);
-        const splitSource = file.source.split(/\r?\n/).map(_ => {
-            return { originalLine: _, errorsToSuppress: new Set<string>() };
+        const splitSource = file.source.split(/\r?\n/);
+        const sourceWithRulesToSuppress: {
+            originalLine: string,
+            rulesToSuppress: Set<string>,
+            skipLine: boolean
+        }[] = [];
+
+        let nextLineRulesToSuppress: string[] = [];
+        splitSource.forEach((sourceLine, index) => {
+            if (ESLINT_DISABLE_REGEXP.test(sourceLine)) {
+                const rulesText = sourceLine.slice(sourceLine.indexOf(ESLINT_DISABLE_TEXT) + ESLINT_DISABLE_TEXT.length);
+                const rulesList = rulesText.split(',').map(_ => _.trim());
+                nextLineRulesToSuppress = rulesList;
+                sourceWithRulesToSuppress.push({
+                    originalLine: sourceLine,
+                    rulesToSuppress: new Set<string>(),
+                    skipLine: true
+                });
+            } else if(COMMENT_TEXT_REGEXP.test(sourceLine)) {
+                sourceWithRulesToSuppress.push({
+                    originalLine: sourceLine,
+                    rulesToSuppress: new Set<string>(),
+                    skipLine: true
+                });
+            } else {
+                sourceWithRulesToSuppress.push({
+                    originalLine: sourceLine,
+                    rulesToSuppress: new Set<string>(nextLineRulesToSuppress),
+                    skipLine: false
+                });
+                nextLineRulesToSuppress = [];
+            }
         });
         const finalSource = new Array<string>();
 
         targets.forEach(target => {
-            const line = splitSource[target.line - 1];
-            line.errorsToSuppress.add(target.ruleId);
+            const line = sourceWithRulesToSuppress[target.line - 1];
+            line.rulesToSuppress.add(target.ruleId);
         });
 
-        splitSource.forEach((_) => {
-            const rulesToSuppress = Array.from(_.errorsToSuppress).sort((a, b) => a.localeCompare(b));
+        sourceWithRulesToSuppress.forEach((_) => {
+            if (_.skipLine) {
+                return;
+            }
+
+            const rulesToSuppress = Array.from(_.rulesToSuppress).sort((a, b) => a.localeCompare(b));
             const originalLine = _.originalLine;
             const originalLineIndentation = _.originalLine.slice(0, _.originalLine.indexOf(originalLine.trimStart()));
             if (rulesToSuppress.length > 0) {
                 finalSource.push(`${originalLineIndentation}// ${COMMENT_TEXT}`);
-                finalSource.push(`${originalLineIndentation}// eslint-disable-next-line ${rulesToSuppress.join(', ')}`);
+                finalSource.push(`${originalLineIndentation}// ${ESLINT_DISABLE_TEXT} ${rulesToSuppress.join(', ')}`);
             }
 
             finalSource.push(_.originalLine);
