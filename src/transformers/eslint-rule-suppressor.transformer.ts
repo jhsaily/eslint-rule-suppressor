@@ -32,7 +32,7 @@ export default async function eslintRuleSuppressor(file: FileInfo, api: API, opt
         }[] = [];
 
         let nextLineRulesToSuppress: string[] = [];
-        splitSource.forEach((sourceLine, index) => {
+        splitSource.forEach(sourceLine => {
             if (ESLINT_DISABLE_REGEXP.test(sourceLine)) {
                 const rulesText = sourceLine.slice(sourceLine.indexOf(ESLINT_DISABLE_TEXT) + ESLINT_DISABLE_TEXT.length);
                 const rulesList = rulesText.split(',').map(_ => _.trim());
