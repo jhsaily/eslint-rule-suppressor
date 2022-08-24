@@ -16,10 +16,10 @@ const testDecoratorFactory = (...args: any[]) => {
 const testDecorator = testDecoratorFactory();
 
 @testDecorator
-// test comment
-export class ClassWithDecorators { // test comment 2
+export class ClassWithDecorators {
 
     @testDecorator
+    // TEST COMMENT
     public testProperty = "hello";
 
     @testDecorator
@@ -40,6 +40,7 @@ export class ClassWithDecorators { // test comment 2
 export class ClassWithDecoratorFactories {
 
     @testDecoratorFactory('hello')
+    // TEST COMMENT
     public testProperty = "hello";
 
     @testDecoratorFactory('hello')
